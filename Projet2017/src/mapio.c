@@ -46,7 +46,6 @@ void map_new (unsigned width, unsigned height)
 
 void map_save (char *filename)
 {
-
   //fprintf (stderr, "Sorry: Map save is not yet implemented\n");
 
   // TODO
@@ -54,16 +53,25 @@ void map_save (char *filename)
     fprintf (stderr, "Sorry: Map save is not yet implemented\n");
 
   }
-  //filename = "sauvegarde.txt";
-  int fd = open(filename,O_WRONLY |O_CREAT|O_TRUNC,0666);
-  int width = map_width();
+//  filename = "sauvegarde.txt";
+  int fd = open(filename,O_WRONLY | O_CREAT | O_TRUNC,0666);
+  int width =  map_width();
   int height = map_height();
   int nbObjet = map_objects();
 
+  char buffer[10];
 
-  write(filename,&width,sizeof(char));
-  write(filename,&height,sizeof(char));
-  write(filename,&nbObjet,sizeof(char));
+
+  sprintf(buffer,"%d\n",width);
+  write(filename,&buffer,sizeof(buffer));
+  write(filename,"/",sizeof(char));
+  sprintf(buffer,"%d\n",height);
+  write(filename,&buffer,sizeof(buffer));
+  write(filename,"/",sizeof(char));
+
+  sprintf(buffer,"%d\n",nbObjet);
+  write(filename,&buffer,sizeof(buffer));
+  write(filename,"/",sizeof(char));
 
   int contenuCase;
   for (int i = 0; i < width; i++) {
@@ -71,29 +79,35 @@ void map_save (char *filename)
       contenuCase = map_get(i,j);
 
       if(contenuCase != MAP_OBJECT_NONE){
-        char* fichierPNG = map_get_name(contenuCase);
+        char *fichierPNG = map_get_name(contenuCase);
         int frames = map_get_frames(contenuCase);
         int solidity = map_get_solidity(contenuCase);
 
         int isDestructible = map_is_destructible(contenuCase);
-        int isCollectible = map_is_collecible(contenuCase);
+        int isCollectible = map_is_collectible(contenuCase);
         int isGenerator = map_is_generator(contenuCase);
-        //créer un signal pour que le loader sache qu'il y a un contenu
-        write(filename,strlen(fichierPNG),sizeof(fichierPNG));
-        for (int l = 0; l < strlen(fichierPNG); l++) {
-          /* code */
-          write(filename, fichierPNG[i], sizeof(char));
-        }
-        write(filename,&frames,sizeof(char));
-        write(filename,&solidity,sizeof(char));
-        write(filename,&isDestructible,sizeof(char));
-        write(filename,&isCollectible,sizeof(char));
-        write(filename,&isGenerator,sizeof(char));
+        write(filename,"!",sizeof(char));//début élement
+        write(filename,&fichierPNG,sizeof(strlen(fichierPNG)));
+        write(filename,"/",sizeof(char));//fin du nom de l'élement
+
+        sprintf(buffer,"%d",frames);
+        write(filename,&buffer,sizeof(buffer));
+
+        sprintf(buffer,"%d",solidity);
+        write(filename,&buffer,sizeof(buffer));
+
+        sprintf(buffer,"%d",isDestructible);
+        write(filename,&buffer,sizeof(buffer));
+
+        sprintf(buffer,"%d",isCollectible);
+        write(filename,&buffer,sizeof(buffer));
+
+        sprintf(buffer,"%d",isGenerator);
+        write(filename,&buffer,sizeof(buffer));
 
       }
-      else{
-        //write(filename,'0',sizeof(char)); vérifier que '0' passe en char
-      }
+      else
+        write(filename,"0",sizeof(char));
     }
   }
   close(fd);
@@ -104,5 +118,4 @@ void map_load (char *filename)
   // TODO
   exit_with_error ("Map load is not yet implemented\n");
 }
-
 #endif
