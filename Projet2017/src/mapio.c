@@ -115,7 +115,59 @@ void map_save (char *filename)
 
 void map_load (char *filename)
 {
-  // TODO
+   /* à enlever
+   // TODO
+   int width,height,nbObjet,frames,solidity,isDestructible,isCOllectible,isGenerator;
+   char *fichierPNG;
+   int file=open(filename,O_RDONLY,0666);
+   char tmp;
+   char *word;
+
+   //sequence à répéter pour chaque données à taille variable du fichier de sauvegarde, peut être simplifier par une fonction int f(int fd) qui lit jusqu'au prochain '/'
+   //width
+   read(file,tmp,sizeof(char));
+   while(tmp!='/'){
+      str_append(word,tmp);
+      read(file,tmp,sizeof(char));
+   }
+   width=atoi(word);
+   //height
+   read(file,tmp,sizeof(char));
+   while(tmp!='/'){
+      str_append(word,tmp);
+      read(file,tmp,sizeof(char));
+   }
+   height=atoi(word);
+   //nbObjet
+    read(file,tmp,sizeof(char));
+   while(tmp!='/'){
+      str_append(word,tmp);
+      read(file,tmp,sizeof(char));
+   }
+   nbObjet=atoi(word);
+
+   //début lecture matrice terrain
+   for(int i = 0;i <width; i++){
+      for(int j = 0; j < height ; j++){
+         if(tmp=='!'){
+            //début read des éléments
+            //je le ferai plus tard wallah
+         }
+         else{//on a un 0 donc un élément banal
+            read(file,tmp,sizeof(char));
+            //on zappe et on passe à la suite maggle
+         }
+
+      }
+
+   }
+
+
+
+
+
+
+   */ //à enlever
   exit_with_error ("Map load is not yet implemented\n");
 }
 #endif
