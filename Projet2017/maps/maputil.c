@@ -1,4 +1,4 @@
-#include "SDL.h"
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,34 +6,35 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <string.h>
+#include <fcntl.h>
 
 
 int main(int argc, char** argv){
-  int file = open(argv[1], ,O_RDONLY | O_WRONLY | O_TRUNC, 0666);
+  int file = open(argv[1],O_RDONLY | O_WRONLY | O_TRUNC, 0666);
   int width, height, nbObject;
 
   read(file,&width,sizeof(int));
   read(file,&height,sizeof(int));
   read(file,&nbObject,sizeof(int));
 
-  if (strcmp(argv[2], "--getwidth")) {
+  if (argv[2]=="--getwidth") {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     printf("width  : %d\n", width);
   }
 
-  if (strcmp(argv[2], "--getheight")) {
+  if (argv[2] =="--getheight") {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     //read(file, &height,sizeof(int));
     printf("height  : %d\n", height);
   }
-  if (strcmp(argv[2], "--getobject")) {
+  if (argv[2]== "--getobject") {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     printf("nbObject :  %d\n", nbObject);
   }
-  if (strcmp(argv[2], "--getinfo")) {
+  if (argv[2]== "--getinfo") {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     printf("width  : %d\n", width);
@@ -41,7 +42,7 @@ int main(int argc, char** argv){
     printf("nbObjet  : %d\n", nbObject);
   }
 
-  if (strcmp(argv[2], "--setwidth") && argc == 3) {
+  if ((argv[2]=="--setwidth") && argc == 3) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     width = atoi(argv[3]);
@@ -49,7 +50,7 @@ int main(int argc, char** argv){
     write(file,&width, sizeof(int));
     printf("width  : %d\n", width);
   }
-  else if (strcmp(argv[2], "--setheigth") && argc == 3 ) {
+  if ((argv[2]=="--setheigth") && argc == 3 ) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     height = atoi(argv[3]);
@@ -58,7 +59,7 @@ int main(int argc, char** argv){
     printf("height  : %d\n", height);
   }
 
-  else if (strcmp(argv[2], "--setwidth") && strcmp(argv[4], "--setheight")) {
+  if ((argv[2]== "--setwidth") && (argv[4]=="--setheight")) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     width = atoi(argv[3]);
@@ -73,7 +74,7 @@ int main(int argc, char** argv){
 
   }
 
-  else if (strcmp(argv[4], "--setwidth") && strcmp(argv[2], "--setheight")) {
+  if ((argv[4]== "--setwidth") && (argv[2]== "--setheight")) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     width = atoi(argv[5]);
@@ -90,7 +91,7 @@ int main(int argc, char** argv){
   }
 
   else{
-    fprintf(stderr, "./maputil <argument> <int>\n", );
+    fprintf(stderr, "./maputil <argument> <int>\n");
   }
 
 }
