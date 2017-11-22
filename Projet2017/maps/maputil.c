@@ -10,8 +10,9 @@
 
 
 int main(int argc, char** argv){
-  int file = open(argv[1],O_RDONLY | O_WRONLY, 0666);
-  int width, height, nbObject;
+  int file = open(argv[1],O_RDWR, 0666);
+  int height, nbObject;
+  int width ;
   lseek(file,0,SEEK_SET);
   read(file,&width,sizeof(int));
   read(file,&height,sizeof(int));
@@ -19,13 +20,15 @@ int main(int argc, char** argv){
 
   if (strcmp(argv[2],"--getwidth") == 0) {
     // on lit la valeur de map_width
-    printf("width  : %d\n", width);
+     // write(1, &width, nbRead);
+   // printf("test  : %d\n", nbRead);
+     printf("width  : %d\n", width);
   }
 
   else if (strcmp(argv[2],"--getheight") == 0) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
-    //read(file, &height,sizeof(int));
+       
     printf("height  : %d\n", height);
   }
   else if (strcmp(argv[2], "--getobject") == 0) {
