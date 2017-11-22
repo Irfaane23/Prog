@@ -44,7 +44,7 @@ int main(int argc, char** argv){
     printf("nbObjet  : %d\n", nbObject);
   }
 
-  else if (strcmp(argv[2],"--setwidth") == 0 && argc == 3) {
+  else if (strcmp(argv[2],"--setwidth") == 0) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     width = atoi(argv[3]);
@@ -52,7 +52,7 @@ int main(int argc, char** argv){
     write(file,&width, sizeof(int));
     printf("width  : %d\n", width);
   }
-  else if (strcmp(argv[2],"--setheigth") == 0 && argc == 3 ) {
+  else if (strcmp(argv[2],"--setheight") == 0 ) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
     height = atoi(argv[3]);
