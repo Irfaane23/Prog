@@ -17,8 +17,35 @@ int main(int argc, char** argv){
   read(file,&width,sizeof(int));
   read(file,&height,sizeof(int));
   read(file,&nbObject,sizeof(int));
+  
+  if (strcmp(argv[2],"--setobjects") == 0) {
+		int fileTMP = open("tmp.map",O_CREAT|O_RDWR, 0666);
+		int num = (argc - 1) % 6;
+		nbObject += num;
+		write(fileTMP,&width,sizeof(int));
+		write(fileTMP,&height,sizeof(int));
+		write(fileTMP,&nbObject,sizeof(int));
+		for (int i = 0; i < num; i++) {
+			const char * name = argv[3 + 6 * i];
+			int taille = strlen(name);
+			printf("\n\n\n\n%d\n\n\n\n", taille);
+			write(fileTMP,&taille,sizeof(int));
+			write(fileTMP,name,taille);
+			for (int j = 0; j < 5; j++){
+				int value = getValue(argv[4 + j + i * 6]);
+				write(fileTMP,&value, sizeof(int));
+			}
+		}
+		char ch;
+		while(read(file,&ch,sizeof(char)) != 0){
+			write(fileTMP, &ch, sizeof(char));
+		}
+		system("rm saved.map");
+		system("mv tmp.map saved.map");
+		return 0;
+	}
 
-  if (strcmp(argv[2],"--getwidth") == 0) {
+  else if (strcmp(argv[2],"--getwidth") == 0) {
     // on lit la valeur de map_width
      // write(1, &width, nbRead);
    // printf("test  : %d\n", nbRead);
