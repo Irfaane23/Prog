@@ -8,6 +8,20 @@
 #include <string.h>
 #include <fcntl.h>
 
+int getValue(const char * msg){
+	if (strcmp(msg, "not-destructible") == 0){
+		return 0;
+	}
+	if (strcmp(msg, "not-collectible") == 0){
+		return 0;
+	}
+	if (strcmp(msg, "not-generator") == 0){
+		return 0;
+	}
+	// solid missing
+	return 1;
+}
+
 
 int main(int argc, char** argv){
   int file = open(argv[1],O_RDWR, 0666);
