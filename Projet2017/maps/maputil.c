@@ -21,6 +21,44 @@ int getValue(const char * msg){
 	// solid missing
 	return 1;
 }
+typedef struct element{
+	int x;
+	int y;
+	int value;
+}element;
+
+void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight){
+	//récupérer tous les objets de la matrice et leurs coordonnées
+	lseek(file,0,SEEK_END-(oldWidth*oldHeight));
+	int contenu;
+	element *tabElmnt[oldWidth*oldHeight];
+	int nbelmnt=0;
+	for(int i=0;i<oldWidth;i++){
+		for(int j=0;j<oldHeight;j++){
+			read(file,&contenu,sizeof(int));
+			if(contenu!=0){
+				tabElmnt[nbelmnt]->value=contenu;
+				nbelmnt++;
+			}
+		}
+	}
+	lseek(file,0,SEEK_END-(oldWidth*oldHeight));
+	for(int i=0;i<newWidth;i++){
+		for(int j=0;j<newHeight;j++){
+			for(int indice=0;indice<(oldWidth*oldHeight);indice++){
+				if(tabElmnt[indice]->x==i && tabElmnt[indice]->y==j){
+					write(file,&tabElmnt[indice]->value,sizeof(int));
+				}
+				if(indice==(oldWidth*oldHeight)-1){
+					write(file,0,sizeof(int));
+				}
+			}
+
+		}
+	}
+	//écrire une nouvelle map avec les nouvelles dimensions en y ajoutant lmes anciens éléments
+
+}
 
 
 int main(int argc, char** argv){
@@ -31,7 +69,7 @@ int main(int argc, char** argv){
   read(file,&width,sizeof(int));
   read(file,&height,sizeof(int));
   read(file,&nbObject,sizeof(int));
-  
+
   if (strcmp(argv[2],"--setobjects") == 0) {
 		int fileTMP = open("tmp.map",O_CREAT|O_RDWR, 0666);
 		int num = (argc - 1) % 6;
@@ -69,7 +107,7 @@ int main(int argc, char** argv){
   else if (strcmp(argv[2],"--getheight") == 0) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
-       
+
     printf("height  : %d\n", height);
   }
   else if (strcmp(argv[2], "--getobject") == 0) {
@@ -88,7 +126,8 @@ int main(int argc, char** argv){
   else if (strcmp(argv[2],"--setwidth") == 0) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
-    width = atoi(argv[3]);
+		setmap(file,width,height,atoi(argv[3]),height);
+		width = atoi(argv[3]);
     lseek(file,0, SEEK_SET);
     write(file,&width, sizeof(int));
     printf("width  : %d\n", width);
