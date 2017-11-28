@@ -18,16 +18,38 @@ static unsigned long get_time (void)
 
   // Only count seconds since beginning of 2016 (not jan 1st, 1970)
   tv.tv_sec -= 3600UL * 24 * 365 * 46;
-  
+
   return tv.tv_sec * 1000000UL + tv.tv_usec;
 }
 
 #ifdef PADAWAN
 
+void handler(int sig){
+
+}
+
+void *infiniteLoop(void *p){
+  struct sigaction s;
+  s.sa_flags = 0;
+  sigemptyset(&s.sa_mask);
+  s.sa_handler = handler;
+  sigaction(SIGALRM,&s,NULL);
+
+  while(1);
+}
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-  // TODO
+  pthread_t t[1];
+
+  for (int i = 0; i < 2; i++) {
+    pthread_create(&t[i],NULL,infiniteLoop,NULL)
+  }
+
+  //
+  for (int i = 0; i < 2; i++) {
+    pthread_join(t[i],NULL)
+  }
 
   return 0; // Implementation not ready
 }
