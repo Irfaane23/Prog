@@ -29,7 +29,7 @@ typedef struct element{
 
 void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight){
 	//récupérer tous les objets de la matrice et leurs coordonnées
-	printf("\nentrée dans set map\n");
+	//printf("\nentrée dans set map\n");
 	lseek(file,0,SEEK_END-(oldWidth*oldHeight));
 	int contenu;
 	element *tabElmnt=(element*)malloc((oldWidth*oldHeight)*sizeof(element));
@@ -47,8 +47,8 @@ void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight){
 	}
 	//écrire une nouvelle map avec les nouvelles dimensions en y ajoutant lmes anciens éléments
 
-	printf("fin récupération des données\n");
-	lseek(file,0,SEEK_END-(oldWidth*oldHeight));
+	//printf("fin récupération des données\n");
+	lseek(file,0,SEEK_END -(oldWidth*oldHeight));
 	int realHeight=oldHeight-newHeight;
 	//if(realHeight<0){
 		//realHeight = abs(realHeight);
@@ -67,13 +67,13 @@ void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight){
 			}
 		}
 
-	printf("fin réécriture de la map\n");
+	//printf("fin réécriture de la map\n");
 
 }
 
 
 int main(int argc, char** argv){
-	printf("ENtree dans main\n");
+	//printf("ENtree dans main\n");
   int file = open(argv[1],O_RDWR, 0666);
   int height, nbObject;
   int width ;
@@ -159,6 +159,8 @@ int main(int argc, char** argv){
   else if (strcmp(argv[2], "--setwidth") == 0 && strcmp(argv[4],"--setheight") == 0) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
+
+		setmap(file,width,height,atoi(argv[3]),atoi(argv[5]));
     width = atoi(argv[3]);
     lseek(file,0, SEEK_SET);
     write(file,&width, sizeof(int));
@@ -173,6 +175,8 @@ int main(int argc, char** argv){
   else if (strcmp(argv[4], "--setwidth") == 0 && strcmp(argv[2], "--setheight") == 0) {
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
+
+		setmap(file,width,height,atoi(argv[5]),atoi(argv[2]));
     width = atoi(argv[5]);
     lseek(file,0, SEEK_SET);
     write(file,&width, sizeof(int));
