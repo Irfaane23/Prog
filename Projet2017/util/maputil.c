@@ -43,6 +43,7 @@ int getValue(const char * msg){
 	return 1;
 }
 
+//*
 int main(int argc, char** argv){
 	int file = open(argv[1],O_RDWR, 0666);
 	int height, nbObject;
