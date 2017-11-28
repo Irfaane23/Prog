@@ -51,8 +51,8 @@ int main(int argc, char** argv){
 	read(file,&width,sizeof(int));
 	read(file,&height,sizeof(int));
 	read(file,&nbObject,sizeof(int));
-
 	if (strcmp(argv[2],"--setobjects") == 0) {
+		// names is to save the existed objects in the saved.map
 		char ** names = (char **)malloc(nbObject * sizeof(char *));
 		int len;
 		for (int i = 0; i < nbObject; i++) {
@@ -67,6 +67,12 @@ int main(int argc, char** argv){
 
 		int num = (argc - 3) / 6;
 		int numFound = 0;
+		/*
+		 * if res[i] is 1, it means that the ith object from argv
+		 * does not exist whereas 0 means it exists
+		 * if the object from argv existed, it shouldn't be added
+		 * into the saved.map
+		 */
 		int * res = (int *)malloc(num * sizeof(int));
 		for (int i = 0; i < num; i++) {
 			res[i] = 1;
@@ -80,12 +86,31 @@ int main(int argc, char** argv){
 			}
 		}
 
+		// fileTMP is a temporary file, which will be the new saved.map
 		int fileTMP = open("tmp.map",O_CREAT|O_RDWR, 0666);
 		int newNbObject = nbObject + num - numFound;
 		write(fileTMP,&width,sizeof(int));
 		write(fileTMP,&height,sizeof(int));
 		write(fileTMP,&newNbObject,sizeof(int));
 
+		// add the existed objects into fileTMP
+		lseek(file,3 * sizeof(int),SEEK_SET);
+		int value;
+		char ch;
+		for (int i = 0; i < nbObject; i++) {
+			read(file,&len, sizeof(int));
+			write(fileTMP, &len, sizeof(int));
+			for (int j = 0; j < len; j++){
+				read(file,&ch,sizeof(char));
+				write(fileTMP, &ch, sizeof(char));
+			}
+			for (int j = 0; j < 5; j++){
+				read(file,&value,sizeof(int));
+				write(fileTMP, &value, sizeof(int));
+			}
+		}
+
+		// add the new objects from argv
 		for (int i = 0; i < num; i++) {
 			if (res[i] == 0) {
 				continue;
@@ -95,13 +120,12 @@ int main(int argc, char** argv){
 			write(fileTMP,&taille,sizeof(int));
 			write(fileTMP,name,taille);
 			for (int j = 0; j < 5; j++){
-				int value = getValue(argv[4 + j + i * 6]);
+				value = getValue(argv[4 + j + i * 6]);
 				write(fileTMP,&value, sizeof(int));
 			}
 		}
 
-		lseek(file,3 * sizeof(int),SEEK_SET);
-		char ch;
+		// add the rest of file into fileTMP
 		while(read(file,&ch,sizeof(char)) != 0){
 			write(fileTMP, &ch, sizeof(char));
 		}
