@@ -52,6 +52,107 @@ int main(int argc, char** argv){
 	read(file,&width,sizeof(int));
 	read(file,&height,sizeof(int));
 	read(file,&nbObject,sizeof(int));
+	if (strcmp(argv[2],"--pruneobjects") == 0) {
+		int len;
+		// go to the map zone
+		for (int i = 0; i < nbObject; i++) {
+			read(file,&len, sizeof(int));
+			lseek(file,len * sizeof(char),SEEK_CUR);
+			lseek(file,5 * sizeof(int),SEEK_CUR);
+		}
+		int value;
+		// check which objects exist in the map
+		// if ith object exists, res[i] will greater than 0
+		int *res = (int *)malloc(nbObject * sizeof(int));
+		memset(res, 0, nbObject * sizeof(int));
+		while(read(file,&value,sizeof(int)) != 0){
+			if (value < 0) {
+				continue;
+			}
+			res[value] = 1;
+		}
+		int num = 0; // count how many objects do not exist in the map
+		for (int i = 0; i < nbObject; i++){
+			if (res[i] == 0){
+				num++;
+			}
+		}
+		int fileTMP = open("tmp.map",O_CREAT|O_RDWR, 0666);
+		int newNbObject = nbObject - num;
+		write(fileTMP,&width,sizeof(int));
+		write(fileTMP,&height,sizeof(int));
+		write(fileTMP,&newNbObject,sizeof(int));
+		char ch;
+		// filter the objects in the current saved.map
+		lseek(file,3 * sizeof(int),SEEK_SET);
+		for (int i = 0; i < nbObject; i++){
+			if (res[i] != 0) {
+				read(file,&len, sizeof(int));
+				write(fileTMP, &len, sizeof(int));
+				for (int j = 0; j < len; j++){
+					read(file,&ch,sizeof(char));
+					write(fileTMP, &ch, sizeof(char));
+				}
+				for (int j = 0; j < 5; j++){
+					read(file,&value,sizeof(int));
+					write(fileTMP, &value, sizeof(int));
+				}
+			}
+			else {
+				// don't add it to the new saved.map if not exists
+				read(file,&len, sizeof(int));
+				lseek(file,len * sizeof(char),SEEK_CUR);
+				lseek(file,5 * sizeof(int),SEEK_CUR);
+			}
+		}
+		/*
+		 * reorganize the values of the map zone
+		 * remove the gaps of the values
+		 * for example,
+		 * if the numbers of the existing objects are:
+		 * 1, 3, 7
+		 * which means that
+		 * res[0] = 0 
+		 * res[1] = 11 (res[1] shows 11 times)
+		 * res[2] = 0
+		 * res[3] > 34
+		 * ...
+		 * res[7] = 5
+		 * ...
+		 * now we need to make them as below:
+		 * 0, 1, 2
+		 * which means that
+		 * res[0] = 0
+		 * res[1] = 0 (this 0 means 0th object, there is no conflict with with 0 meaning "not exist")
+		 * res[2] = 0
+		 * res[3] = 1
+		 * ...
+		 * res[7] = 2
+		 * ...
+		 */
+		int counter = 0;
+		for (int i = 0; i < nbObject; i++) {
+			if (res[i] != 0) {
+				res[i] = counter++;
+			}
+		}
+		int val;
+		while(read(file,&val,sizeof(int)) != 0){
+			if (val == -1) {
+				write(fileTMP, &val, sizeof(int));
+			}
+			else {
+				write(fileTMP, &res[val], sizeof(int));
+			}
+		}
+		char order[50] = {'\0'};
+		strcat(order, "mv tmp.map ");
+		strcat(order, argv[1]);
+		system(order);
+		free(res);
+		return 0;
+	}
+
 	if (strcmp(argv[2],"--setobjects") == 0) {
 		// names is to save the existed objects in the saved.map
 		char ** names = (char **)malloc(nbObject * sizeof(char *));
