@@ -24,33 +24,37 @@ static unsigned long get_time (void)
 
 #ifdef PADAWAN
 
-void handler(int sig){
-
+void handler(int* param){
+  printf("sdl_push_event(%p) appelée au temps %ld\n", param, get_time);
 }
 
 void *infiniteLoop(void *p){
-  struct sigaction s;
-  s.sa_flags = 0;
-  sigemptyset(&s.sa_mask);
-  s.sa_handler = handler;
-  sigaction(SIGALRM,&s,NULL);
+
 
   while(1);
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-  pthread_t t[1];
+/*  int nbThreads = 3;
+  pthread_t t[nbThreads];
 
-  for (int i = 0; i < 2; i++) {
-    pthread_create(&t[i],NULL,infiniteLoop,NULL)
+  struct sigaction s;
+  s.sa_flags = 0;
+  sigemptyset(&s.sa_mask);
+  s.sa_handler = handler;
+  sigaction(SIGALRM,&s,NULL);
+
+  // Creaation du démon
+  for (int i = 0; i < nbThreads; i++) {
+    pthread_create(&t[i],NULL,infiniteLoop,NULL);
   }
 
-  //
-  for (int i = 0; i < 2; i++) {
-    pthread_join(t[i],NULL)
-  }
 
+  for (int i = 0; i < 2; i++) {
+    pthread_join(t[i],NULL);
+  }
+*/
   return 0; // Implementation not ready
 }
 
