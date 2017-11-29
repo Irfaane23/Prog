@@ -153,6 +153,9 @@ int main(int argc, char** argv){
 		return 0;
 	}
 
+
+
+
 	if (strcmp(argv[2],"--setobjects") == 0) {
 		// names is to save the existed objects in the saved.map
 		char ** names = (char **)malloc(nbObject * sizeof(char *));
