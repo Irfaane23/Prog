@@ -39,18 +39,18 @@ void *infiniteLoop(void *p){
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
-{
+{/*
   pthread_t t[1];
 
   for (int i = 0; i < 2; i++) {
-    pthread_create(&t[i],NULL,infiniteLoop,NULL)
+    pthread_create(&t[i],NULL,infiniteLoop,NULL);
   }
 
   //
   for (int i = 0; i < 2; i++) {
-    pthread_join(t[i],NULL)
+    pthread_join(t[i],NULL);
   }
-
+  */
   return 0; // Implementation not ready
 }
 

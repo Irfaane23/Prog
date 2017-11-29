@@ -27,20 +27,28 @@ typedef struct element{
 	int value;
 }element;
 
-void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight){
+void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight,int nbObject){
 	//récupérer tous les objets de la matrice et leurs coordonnées
 	//printf("\nentrée dans set map\n");
 	lseek(file,0,SEEK_END-(oldWidth*oldHeight));
 	int contenu;
+	int realHeight=oldHeight-newHeight;
 	element *tabElmnt=(element*)malloc((oldWidth*oldHeight)*sizeof(element));
 	int nbelmnt=0;
 	for(int i=0;i<oldWidth;i++){
 		for(int j=0;j<oldHeight;j++){
 			read(file,&contenu,sizeof(int));
-			if(contenu!=0){
+			if(contenu>=0){
+				if(contenu>nbObject){
+					printf("\ncontenu=%d x=%d y=%d ",contenu,i,j);
+				}
 				tabElmnt[nbelmnt].x=i;
-				tabElmnt[nbelmnt].y=j;
-				tabElmnt[nbelmnt].value=contenu;
+				tabElmnt[nbelmnt].y=j+realHeight;
+				if(tabElmnt[nbelmnt].value>nbObject){
+					tabElmnt[nbelmnt].value=-1;
+				}
+				else {tabElmnt[nbelmnt].value=contenu;
+				}
 				nbelmnt++;
 			}
 		}
@@ -50,25 +58,26 @@ void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight){
 	//printf("fin récupération des données\n");
 	lseek(file,0,SEEK_END -(oldWidth*oldHeight));
 	int realHeight=oldHeight-newHeight;
+	int none=-1;
 	//if(realHeight<0){
 		//realHeight = abs(realHeight);
 		for(int i=0;i<newWidth;i++){
-			for(int j=abs(realHeight);j<newHeight;j++){
-				for(int indice=0;indice<(oldWidth*oldHeight);indice++){
-					if(tabElmnt[indice].x==i && (tabElmnt[indice].y)==(j) && (tabElmnt[indice].value>0)){
+			for(int j=0;j<newHeight;j++){
+				for(int indice=0;indice<(nbelmnt);indice++){
+					if(tabElmnt[indice].x==i && (tabElmnt[indice].y)==(j) && (tabElmnt[indice].value>=0)){
 						write(file,&tabElmnt[indice].value,sizeof(int));
 						tabElmnt[indice].value=-1;
 					}
-					if(indice==(oldWidth*oldHeight)-1){
-						write(file,0,sizeof(int));
+					if(indice==(nbelmnt)-1){
+						write(file,&none,sizeof(int));
 					}
 				}
-
 			}
 		}
 
 	//printf("fin réécriture de la map\n");
 
+	free(tabElmnt);
 }
 
 
@@ -139,7 +148,7 @@ int main(int argc, char** argv){
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
 		printf("\nentrée dans --setwidth\n");
-		setmap(file,width,height,atoi(argv[3]),height);
+		setmap(file,width,height,atoi(argv[3]),height,nbObject);
 		width = atoi(argv[3]);
     lseek(file,0, SEEK_SET);
     write(file,&width, sizeof(int));
@@ -150,7 +159,7 @@ int main(int argc, char** argv){
     //read(file, &width,sizeof(int));
 		printf("\nentrée dans la condition setheight\n");
 
-		setmap(file,width,height,width,atoi(argv[3]));
+		setmap(file,width,height,width,atoi(argv[3]),nbObject);
     height = atoi(argv[3]);
     lseek(file,sizeof(int), SEEK_SET);
     write(file,&height, sizeof(int));
@@ -160,7 +169,7 @@ int main(int argc, char** argv){
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
 
-		setmap(file,width,height,atoi(argv[3]),atoi(argv[5]));
+		setmap(file,width,height,atoi(argv[3]),atoi(argv[5]),nbObject);
     width = atoi(argv[3]);
     lseek(file,0, SEEK_SET);
     write(file,&width, sizeof(int));
@@ -176,7 +185,7 @@ int main(int argc, char** argv){
     // on lit la valeur de map_width
     //read(file, &width,sizeof(int));
 
-		setmap(file,width,height,atoi(argv[5]),atoi(argv[2]));
+		setmap(file,width,height,atoi(argv[5]),atoi(argv[2]),nbObject);
     width = atoi(argv[5]);
     lseek(file,0, SEEK_SET);
     write(file,&width, sizeof(int));
