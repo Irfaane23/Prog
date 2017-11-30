@@ -42,6 +42,72 @@ int getValue(const char * msg){
 
 	return 1;
 }
+void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight,int nbObject){
+	//d'abord on revient au début de la création de la matrice dans le fichier file. On commence à SEEK_END et on revient de
+	//((oldWidth*oldHeight)*(sizeof(int)) en arrière pour mettre le lseek sur le début de la matrice
+	off_t position1=lseek(file,-((oldWidth*oldHeight)*(sizeof(int))),SEEK_END);
+	int contenu;
+	int realHeight=newHeight-oldHeight;//on étudie la différence entre l'ancienne taille et la nouvelle
+	int val1, val2;
+	if (oldWidth < newWidth) {
+		val1 = newWidth;
+	}
+	else val1 = oldWidth;
+
+	if (oldHeight < newHeight) {
+		val2 = newHeight;
+	}
+	//val1 nous donne le max entre oldwidth et newWidth
+	//val2 nous donne le max entre oldHeight et newHeight
+	else val2 = oldWidth;
+	element *tabElmnt=(element*)malloc((val1*val2)*sizeof(element));//on a créé une structure element qui accueille un x,y et un value qui vaut contenu
+	//contenu représente la valeur de l'objet dans le tableau d'objet comme dans prune
+	for(int i=0;i<(val1*val2);i++){
+		tabElmnt[i].value=-1; //ici on initialise le tableau d'éléments à -1 pour chaque value du tableau
+	}
+
+	int nbelmnt=0;
+	for(int i=0;i<val1;i++){
+		for(int j=0;j<val2;j++){
+			if((i>oldWidth)||j<realHeight){ //si un élément n'appartient pas à l'ancienne matrice on le met à -1 pour qu'il soit vide
+				//printf("\nout of bound");
+				tabElmnt[nbelmnt].value=-1;
+			}else {//sinon on read le contenu dans la matrice et on le met dans le value de l'élement
+				read(file,&contenu,sizeof(int));
+				tabElmnt[nbelmnt].value=contenu;
+			}
+			tabElmnt[nbelmnt].x=i;
+			tabElmnt[nbelmnt].y=j+realHeight;//le +realHeight c'est pour étudier la différence entre l'ancienne hauteur
+			//et la nouvelle
+
+			nbelmnt++;//incrémentation du nombre d'élément dans le tableau d'élément
+			}
+		}
+	//printf("\nnbelmnt :%d\n",nbelmnt);
+	lseek(file,-((oldWidth*oldHeight)*(sizeof(int))),SEEK_END); //on remet le lseek au début de la matrice.
+	//cette partie risque de bugger car je n'arrive pas à retourner au début de la matrice avec le même lseek qu'au début
+	//il faut trouver les bons paramètres du offset de lseek
+	int none=-1;//permet de faire un write de -1 qui correspond à OBJECT NONE
+		//on démarre la création de la nouvelle matrice allant de newWidth à newHeight
+		for(int i=0;i<newWidth;i++){
+			for(int j=0;j<newHeight;j++){
+				for(int indice=0;indice<(nbelmnt);indice++){//dans la boucle newWidth newHeight, pour chaque i et j on vérifie
+					//qu'il n'existe pas un élément de tabElmnt qui ai pour coordonnée i et j.
+				 if((tabElmnt[indice].x==i) && (tabElmnt[indice].y)==(j)){//Si oui alors on write dans le fichier l'élément de tabElmnt
+							write(file,&(tabElmnt[indice].value),sizeof(int));
+						}
+				}
+			}
+		}
+	free(tabElmnt);
+	//lorsque la map est réduite il faut effacer dans le fichier tout ce qui reste derrière car sinon ça revient quand on
+	//l'aggrandit. j'ai essayé d'utiliser ftruncate qui ne garde que length octets de mémoire dans le file mais je n'arrive pas
+	//à m'en servir.
+	//Si au final tu crois trouver une meilleure méthode sans utiliser de setmap alors fais comme tu veux. fais de ton mieux. et désolé de
+	//pas avoir réussi.
+	//ps:efface les commentaires et met des noms de variables correctes.La dernière partie on assure!!!
+}
+
 
 //*
 int main(int argc, char** argv){
@@ -112,7 +178,7 @@ int main(int argc, char** argv){
 		 * if the numbers of the existing objects are:
 		 * 1, 3, 7
 		 * which means that
-		 * res[0] = 0 
+		 * res[0] = 0
 		 * res[1] = 11 (res[1] shows 11 times)
 		 * res[2] = 0
 		 * res[3] > 34
@@ -272,50 +338,59 @@ int main(int argc, char** argv){
 	}
 
 	else if (strcmp(argv[2],"--setwidth") == 0) {
-		// on lit la valeur de map_width
-		//read(file, &width,sizeof(int));
+    // on lit la valeur de map_width
+    //read(file, &width,sizeof(int));
+		printf("\nentrée dans --setwidth\n");
+		setmap(file,width,height,atoi(argv[3]),height,nbObject);
 		width = atoi(argv[3]);
-		lseek(file,0, SEEK_SET);
-		write(file,&width, sizeof(int));
-		printf("width  : %d\n", width);
-	}
-	else if (strcmp(argv[2],"--setheight") == 0 ) {
-		// on lit la valeur de map_width
-		//read(file, &width,sizeof(int));
-		height = atoi(argv[3]);
-		lseek(file,sizeof(int), SEEK_SET);
-		write(file,&height, sizeof(int));
-		printf("height  : %d\n", height);
-	}
-	else if (strcmp(argv[2], "--setwidth") == 0 && strcmp(argv[4],"--setheight") == 0) {
-		// on lit la valeur de map_width
-		//read(file, &width,sizeof(int));
-		width = atoi(argv[3]);
-		lseek(file,0, SEEK_SET);
-		write(file,&width, sizeof(int));
+    lseek(file,0, SEEK_SET);
+    write(file,&width, sizeof(int));
+    printf("width  : %d\n", width);
+  }
+  else if (strcmp(argv[2],"--setheight") == 0 ) {
+    // on lit la valeur de map_width
+    //read(file, &width,sizeof(int));
+		printf("\nentrée dans la condition setheight\n");
 
-		height = atoi(argv[5]);
-		lseek(file,sizeof(int), SEEK_SET);
-		write(file,&height, sizeof(int));
-		printf("width  : %d\n", width);
-		printf("height  : %d\n", height);
+		setmap(file,width,height,width,atoi(argv[3]),nbObject);
+    height = atoi(argv[3]);
+    lseek(file,sizeof(int), SEEK_SET);
+    write(file,&height, sizeof(int));
+    printf("\nheight  : %d\n", height);
+  }
+  else if (strcmp(argv[2], "--setwidth") == 0 && strcmp(argv[4],"--setheight") == 0) {
+    // on lit la valeur de map_width
+    //read(file, &width,sizeof(int));
 
-	}
-	else if (strcmp(argv[4], "--setwidth") == 0 && strcmp(argv[2], "--setheight") == 0) {
-		// on lit la valeur de map_width
-		//read(file, &width,sizeof(int));
-		width = atoi(argv[5]);
-		lseek(file,0, SEEK_SET);
-		write(file,&width, sizeof(int));
+		setmap(file,width,height,atoi(argv[3]),atoi(argv[5]),nbObject);
+    width = atoi(argv[3]);
+    lseek(file,0, SEEK_SET);
+    write(file,&width, sizeof(int));
 
-		height = atoi(argv[3]);
-		lseek(file,sizeof(int), SEEK_SET);
-		write(file,&height, sizeof(int));
+    height = atoi(argv[5!]);
+    lseek(file,sizeof(int), SEEK_SET);
+    write(file,&height, sizeof(int));
+    printf("width  : %d\n", width);
+    printf("height  : %d\n", height);
 
-		printf("width  : %d\n", width);
-		printf("height  : %d\n", height);
+  }
+  else if (strcmp(argv[4], "--setwidth") == 0 && strcmp(argv[2], "--setheight") == 0) {
+    // on lit la valeur de map_width
+    //read(file, &width,sizeof(int));
 
-	}
+		setmap(file,width,height,atoi(argv[5]),atoi(argv[2]),nbObject);
+    width = atoi(argv[5]);
+    lseek(file,0, SEEK_SET);
+    write(file,&width, sizeof(int));
+
+    height = atoi(argv[3]);
+    lseek(file,sizeof(int), SEEK_SET);
+    write(file,&height, sizeof(int));
+
+    printf("width  : %d\n", width);
+    printf("height  : %d\n", height);
+
+  }
 	else{
 		fprintf(stderr, "./maputil <argument> <int>\n");
 	}
