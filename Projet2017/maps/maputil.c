@@ -30,43 +30,42 @@ typedef struct element{
 void setmap(int file,int oldWidth,int oldHeight,int newWidth, int newHeight,int nbObject){
 	//récupérer tous les objets de la matrice et leurs coordonnées
 	//printf("\nentrée dans set map\n");
-	lseek(file,0,SEEK_END-(oldWidth*oldHeight));
+	off_t position=lseek(file,-(oldWidth*oldHeight),SEEK_END);
+	printf("\nnb end:%d sizeof decrease:%d",SEEK_END,(oldWidth*oldHeight));
 	int contenu;
 	int realHeight=oldHeight-newHeight;
 	element *tabElmnt=(element*)malloc((oldWidth*oldHeight)*sizeof(element));
+	for(int i=0;i<(oldWidth*oldHeight);i++){
+		tabElmnt[i].value=-1;
+	}
 	int nbelmnt=0;
 	for(int i=0;i<oldWidth;i++){
 		for(int j=0;j<oldHeight;j++){
 			read(file,&contenu,sizeof(int));
-			if(contenu>=0){
-				if(contenu>nbObject){
-					printf("\ncontenu=%d x=%d y=%d ",contenu,i,j);
-				}
+			if(contenu!=-1){
 				tabElmnt[nbelmnt].x=i;
-				tabElmnt[nbelmnt].y=j+realHeight;
-				if(tabElmnt[nbelmnt].value>nbObject){
-					tabElmnt[nbelmnt].value=-1;
-				}
-				else {tabElmnt[nbelmnt].value=contenu;
-				}
+				tabElmnt[nbelmnt].y=j;
+				tabElmnt[nbelmnt].value=contenu;
 				nbelmnt++;
 			}
 		}
 	}
+	printf("\nnbelmnt :%d\n",nbelmnt);
 	//écrire une nouvelle map avec les nouvelles dimensions en y ajoutant lmes anciens éléments
 
 	//printf("fin récupération des données\n");
-	lseek(file,0,SEEK_END -(oldWidth*oldHeight));
-	int realHeight=oldHeight-newHeight;
+	lseek(file,position,SEEK_SET);
+	//printf("\nnb end:%d sizeof decrease:%d",SEEK_END,(oldWidth*oldHeight));
 	int none=-1;
 	//if(realHeight<0){
 		//realHeight = abs(realHeight);
 		for(int i=0;i<newWidth;i++){
-			for(int j=0;j<newHeight;j++){
+			for(int j=realHeight;j<newHeight;j++){
 				for(int indice=0;indice<(nbelmnt);indice++){
-					if(tabElmnt[indice].x==i && (tabElmnt[indice].y)==(j) && (tabElmnt[indice].value>=0)){
+					if(tabElmnt[indice].x==i && (tabElmnt[indice].y)==(j)){
 						write(file,&tabElmnt[indice].value,sizeof(int));
 						tabElmnt[indice].value=-1;
+						//printf("contenu:%d x:%d y:%d",tabElmnt[indice].value,tabElmnt[indice].x,tabElmnt[indice].y);
 					}
 					if(indice==(nbelmnt)-1){
 						write(file,&none,sizeof(int));
