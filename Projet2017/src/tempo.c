@@ -24,20 +24,26 @@ static unsigned long get_time (void)
 
 #ifdef PADAWAN
 
-void handler(int* param){
-  printf("sdl_push_event(%p) appelée au temps %ld\n", param, get_time);
+void handler(){
+  //printf("sdl_push_event(%p) appelée au temps %ld\n", param, get_time);
 }
 
 void *infiniteLoop(void *p){
 
-
-  while(1);
+  while(1){
+    sigsuspend(&mask);
+    kill(pthread_self(),9);
+  }
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-/*  int nbThreads = 3;
+  int nbThreads = 3;
   pthread_t t[nbThreads];
+
+  sigset_t mask;
+  sigemptyset(&mask);
+  sigprocmask(SIG_BLOCK,&mask,NULL);
 
   struct sigaction s;
   s.sa_flags = 0;
@@ -54,7 +60,7 @@ int timer_init (void)
   for (int i = 0; i < 2; i++) {
     pthread_join(t[i],NULL);
   }
-*/
+
   return 0; // Implementation not ready
 }
 
