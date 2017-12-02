@@ -9,6 +9,8 @@
 
 #include "timer.h"
 
+
+sigset_t mask;
 // Return number of elapsed µsec since... a long time ago
 static unsigned long get_time (void)
 {
@@ -31,9 +33,8 @@ void handler(){
 void *infiniteLoop(void *p){
 
   while(1){
-
     sigsuspend(&mask);
-  //  kill(pthread_self(),9); //14 : SIGALRM
+
   }
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
@@ -42,9 +43,9 @@ int timer_init (void)
   int nbThreads = 2;
   pthread_t t[nbThreads];
 
-  sigset_t mask;
   sigemptyset(&mask);
-  sigprocmask(SIG_ALRM,&mask,NULL);
+  sigaddset(&mask,SIG_ALRM);
+  //sigprocmask(SIG_BLOCK,&mask,NULL);
 
   struct sigaction s;
   s.sa_flags = 0;
