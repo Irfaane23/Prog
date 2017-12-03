@@ -10,7 +10,7 @@
 #include "timer.h"
 
 
-sigset_t mask;
+sigset_t mask , vide;
 // Return number of elapsed µsec since... a long time ago
 static unsigned long get_time (void)
 {
@@ -33,8 +33,8 @@ void handler(){
 void *infiniteLoop(void *p){
 
   while(1){
-    sigsuspend(&mask);
-
+  //  kill(pthread_self(),SIGALRM);
+    sigsuspend(&vide);
   }
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
@@ -43,15 +43,17 @@ int timer_init (void)
   int nbThreads = 2;
   pthread_t t[nbThreads];
 
-  sigemptyset(&mask);
-  sigaddset(&mask,SIG_ALRM);
-  //sigprocmask(SIG_BLOCK,&mask,NULL);
+
 
   struct sigaction s;
   s.sa_flags = 0;
   sigemptyset(&s.sa_mask);
   s.sa_handler = handler;
   sigaction(SIGALRM,&s,NULL);
+
+  sigemptyset(&vide);
+  sigemptyset(&mask);
+  sigaddset(&mask,SIGALRM);
 
   // Creaation du démon
   for (int i = 0; i < nbThreads; i++) {
