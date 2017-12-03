@@ -9,8 +9,6 @@
 
 #include "timer.h"
 
-
-sigset_t mask , vide;
 // Return number of elapsed µsec since... a long time ago
 static unsigned long get_time (void)
 {
@@ -26,15 +24,21 @@ static unsigned long get_time (void)
 
 #ifdef PADAWAN
 
-void handler(){
-  printf("Thread courant : %p \n", pthread_self());
+void handler(int sig){
+  printf("Thread courant : %p envoie le signal %d \n", pthread_self(), sig);
 }
 
 void *infiniteLoop(void *p){
 
+    sigset_t mask;
+    //Blocage de tous les signaux
+    sigemptyset(&mask);
+    //on ajoute au mask le signal SIGALRM : qui est son seul signal
+    sigaddset(&mask, SIGALRM);
+
   while(1){
   //  kill(pthread_self(),SIGALRM);
-    sigsuspend(&vide);
+    sigsuspend(&mask);
   }
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
@@ -43,24 +47,24 @@ int timer_init (void)
   int nbThreads = 2;
   pthread_t t[nbThreads];
 
+  sigset_t block;
+  sigemptyset(&block);
+  sigaddset(&block, SIGALRM);
+  sigprocmask(SIG_BLOCK, &block, NULL);
 
-
+  //installation du handler pour le signal SIGALRM
   struct sigaction s;
   s.sa_flags = 0;
   sigemptyset(&s.sa_mask);
-  s.sa_handler = handler;
+  s.sa_handler = handler; // va afficher le thread courant
   sigaction(SIGALRM,&s,NULL);
-
-  sigemptyset(&vide);
-  sigemptyset(&mask);
-  sigaddset(&mask,SIGALRM);
 
   // Creaation du démon
   for (int i = 0; i < nbThreads; i++) {
     pthread_create(t,NULL,infiniteLoop,NULL);
   }
 
-
+  //on attend que les threads terminent
   for (int i = 0; i < nbThreads; i++) {
     pthread_join(t[i],NULL);
   }
