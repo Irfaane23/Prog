@@ -26,7 +26,17 @@ static unsigned long get_time (void)
 
 void handler(int sig){
   printf("Thread courant : %p envoie le signal %d \n", pthread_self(), sig);
+  //printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
+  //sdl_push_event();
 }
+
+typedef struct event_list{
+  void* evenement;
+  unsigned long tps;
+  struct event_list *next_event;
+}liste;
+
+liste *l = NULL;
 
 void *infiniteLoop(void *p){
 
@@ -43,10 +53,8 @@ void *infiniteLoop(void *p){
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-  int nbThreads = 2; // 1 seul thread
+  int nbThreads = 3;
   pthread_t t[nbThreads];
-
-
 
   //installation du handler pour le signal SIGALRM
   struct sigaction s;
@@ -61,24 +69,37 @@ int timer_init (void)
   pthread_sigmask(SIG_BLOCK, &block, NULL);
 
   // Creaation du démon
-  for (int i = 0; i < nbThreads; i++) {
-    pthread_create(t,NULL,infiniteLoop,NULL);
+ for (int i = 0; i < nbThreads; i++) {
+    pthread_create(t,NULL,(void*)infiniteLoop,NULL);
   }
 
-  //on attend que les threads terminent
-  for (int i = 0; i < nbThreads; i++) {
-    pthread_join(t[i],NULL);
-  }
-
-  return 0; // Implementation not ready
+  return 1; // Implementation not ready
 }
 
 timer_id_t timer_set (Uint32 delay, void *param)
 {
-  // TODO
+  //structure du timer
+  struct itimerval timer;
 
-  printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
+  //si le premier element de la liste est vide alors on
+  // creer un nouvel evenement
+  if(l->evenement == NULL){
+    //creer un evenement
+
+  }
+
+  else{
+    //on execute le signal
+  }
+//  printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
   //sdl_push_event();
+
+ timer.it_value.tv_sec = 0;
+ timer.it_value.tv_usec = 0;
+
+ timer.it_interval.tv_sec = delay/1000;
+ timer.it_interval.tv_usec = get_time()+delay/1000;
+ setitimer(ITIMER_REAL, &timer, NULL);
   return (timer_id_t) NULL;
 }
 
