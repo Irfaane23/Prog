@@ -44,7 +44,9 @@ LISTE* new_event(long timer,void* event){
   lBis->next_event=NULL;
   return lBis;
 }
+/*LISTE* ajouteEvent(){
 
+}*/
 void untilNext(LISTE *l,Uint32 delay, void*param){
   if(l->next_event != NULL){
     printf("\nevenement : %p",l->evenement);
@@ -54,6 +56,8 @@ void untilNext(LISTE *l,Uint32 delay, void*param){
     l->next_event=new_event(delay,param);
   }
 }
+
+
 void *infiniteLoop(void *p){
     //printf("\ndans infinite loop");
     sigset_t mask;
@@ -69,9 +73,10 @@ void *infiniteLoop(void *p){
 }
 
 void handler(int sig){
-  printf("Thread courant : %p envoie le signal %d \n", pthread_self(), sig);
+  // sig);
+//  printf("\nBonjour handler");
+  sdl_push_event(l->evenement);
 
-  sdl_push_event(&l);
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
@@ -107,34 +112,29 @@ int timer_init (void)
 timer_id_t timer_set (Uint32 delay, void *param)
 {
 
-  //structure du timer
-
-  //printf("\njuste avant itimerval");
   //pthread_mutex_lock(&mutex);
   if(l == NULL){
     //creer un evenement
     //printf("\nadd event");
-     l=new_event(delay,param);
+     l=new_event(get_time()+delay,param);
   }
   else{
     //on execute le signal
-    untilNext(l,delay,param);
+    untilNext(l,delay +get_time(),param);
     printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
   }
+  printf("Thread courant : %p envoie le signal \n", pthread_self());
   //pthread_mutex_unlock(&mutex);
-//  printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
-  //sdl_push_event();
-  //printf("\nadd event");
-
 
   ////// PAS TOUCHE /////////////
 
   struct itimerval timer;
-  timer.it_value.tv_sec = 0;
-  timer.it_value.tv_usec = 0;
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 0;
 
-  timer.it_interval.tv_sec = delay/1000;
-  timer.it_interval.tv_usec = (delay%1000)/1000;
+  timer.it_value.tv_sec = delay/1000;
+  timer.it_value.tv_usec = (delay%1000)*1000;
+
   setitimer(ITIMER_REAL, &timer, NULL);
 
   return (timer_id_t) NULL;
