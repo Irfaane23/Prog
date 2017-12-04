@@ -34,23 +34,19 @@ void *infiniteLoop(void *p){
     //Blocage de tous les signaux
     sigemptyset(&mask);
     //on ajoute au mask le signal SIGALRM : qui est son seul signal
-    sigaddset(&mask, SIGALRM);
+    pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
   while(1){
-  //  kill(pthread_self(),SIGALRM);
     sigsuspend(&mask);
   }
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-  int nbThreads = 2;
+  int nbThreads = 2; // 1 seul thread
   pthread_t t[nbThreads];
 
-  sigset_t block;
-  sigemptyset(&block);
-  sigaddset(&block, SIGALRM);
-  sigprocmask(SIG_BLOCK, &block, NULL);
+
 
   //installation du handler pour le signal SIGALRM
   struct sigaction s;
@@ -58,6 +54,11 @@ int timer_init (void)
   sigemptyset(&s.sa_mask);
   s.sa_handler = handler; // va afficher le thread courant
   sigaction(SIGALRM,&s,NULL);
+
+  sigset_t block;
+  sigemptyset(&block);
+  sigaddset(&block, SIGALRM);
+  pthread_sigmask(SIG_BLOCK, &block, NULL);
 
   // Creaation du démon
   for (int i = 0; i < nbThreads; i++) {
@@ -76,6 +77,8 @@ timer_id_t timer_set (Uint32 delay, void *param)
 {
   // TODO
 
+  printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
+  //sdl_push_event();
   return (timer_id_t) NULL;
 }
 
