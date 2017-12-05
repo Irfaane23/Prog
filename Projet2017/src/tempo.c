@@ -44,16 +44,17 @@ LISTE* new_event(long timer,void* event){
   lBis->next_event=NULL;
   return lBis;
 }
-/*LISTE* ajouteEvent(){
 
-}*/
 void untilNext(LISTE *l,Uint32 delay, void*param){
   if(l->next_event != NULL){
     printf("\nevenement : %p",l->evenement);
     untilNext(l->next_event,delay+get_time(),param);
   }
   else{
+    //pthread_mutex_lock(&mutex);
     l->next_event=new_event(delay+get_time(),param);
+    printf("\nnext_event : %p",l->next_event);
+    //pthread_mutex_unlock(&mutex);
   }
 }
 
@@ -69,17 +70,18 @@ void *infiniteLoop(void *p){
   while(1){
     //printf("\nc'est pas beau wallah");
     sigsuspend(&mask);
+
   }
 }
 
 void handler(int sig){
-
-  while(l!=NULL){
+    //while(l->tps-get_time()<0){
+    //  pthread_mutex_unlock(&mutex);
+    //}
     sdl_push_event(l->evenement);
+    printf("\nDEBUG SLD\n");
     l=l->next_event;
   }
-
-}
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
@@ -100,7 +102,7 @@ int timer_init (void)
   sigaddset(&block, SIGALRM);
   pthread_sigmask(SIG_BLOCK, &block, NULL);
 
-  // Creaation du démon
+  // Creation du démon
   //printf("\njuste avant le loop");
  for (int i = 0; i < nbThreads; i++) {
     //printf("\navant le premier create");
@@ -114,7 +116,7 @@ int timer_init (void)
 timer_id_t timer_set (Uint32 delay, void *param)
 {
 
-  //pthread_mutex_lock(&mutex);
+  pthread_mutex_lock(&mutex);
   if(l == NULL){
     //creer un evenement
     //printf("\nadd event");
@@ -126,7 +128,7 @@ timer_id_t timer_set (Uint32 delay, void *param)
     printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
   }
   printf("Thread courant : %p envoie le signal \n", pthread_self());
-  //pthread_mutex_unlock(&mutex);
+  pthread_mutex_unlock(&mutex);
 
   ////// PAS TOUCHE /////////////
 
@@ -137,9 +139,9 @@ timer_id_t timer_set (Uint32 delay, void *param)
   timer.it_value.tv_sec = delay/1000;
   timer.it_value.tv_usec = (delay%1000)*1000;
 
-  pthread_mutex_lock(&mutex);
+  //pthread_mutex_lock(&mutex);
   setitimer(ITIMER_REAL, &timer, NULL);
-  pthread_mutex_unlock(&mutex);
+  //pthread_mutex_unlock(&mutex);
   return (timer_id_t) NULL;
 }
 
