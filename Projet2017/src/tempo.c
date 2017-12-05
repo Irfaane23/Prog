@@ -50,10 +50,10 @@ LISTE* new_event(long timer,void* event){
 void untilNext(LISTE *l,Uint32 delay, void*param){
   if(l->next_event != NULL){
     printf("\nevenement : %p",l->evenement);
-    untilNext(l->next_event,delay,param);
+    untilNext(l->next_event,delay+get_time(),param);
   }
   else{
-    l->next_event=new_event(delay,param);
+    l->next_event=new_event(delay+get_time(),param);
   }
 }
 
@@ -73,9 +73,11 @@ void *infiniteLoop(void *p){
 }
 
 void handler(int sig){
-  // sig);
-//  printf("\nBonjour handler");
-  sdl_push_event(l->evenement);
+
+  while(l!=NULL){
+    sdl_push_event(l->evenement);
+    l=l->next_event;
+  }
 
 }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
@@ -135,8 +137,9 @@ timer_id_t timer_set (Uint32 delay, void *param)
   timer.it_value.tv_sec = delay/1000;
   timer.it_value.tv_usec = (delay%1000)*1000;
 
+  pthread_mutex_lock(&mutex);
   setitimer(ITIMER_REAL, &timer, NULL);
-
+  pthread_mutex_unlock(&mutex);
   return (timer_id_t) NULL;
 }
 
