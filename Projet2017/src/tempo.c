@@ -66,7 +66,6 @@ void *infiniteLoop(void *p){
 
 void handler(int sig){
     sdl_push_event(l->evenement);
-    printf("\nDEBUG SLD\n");  
     l=l->next_event;
   }
 int timer_init (void)
@@ -93,19 +92,13 @@ int timer_init (void)
 
 timer_id_t timer_set (Uint32 delay, void *param)
 {
-
-   pthread_mutex_lock(&mutex);
+ 
   if(l == NULL){
      l=new_event(get_time()+delay,param);
   }
   else{
     untilNext(l,delay +get_time(),param);
-    printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
   }
-  printf("Thread courant : %p envoie le signal \n", pthread_self());
-   pthread_mutex_unlock(&mutex);
-
-
   struct itimerval timer;
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 0;
