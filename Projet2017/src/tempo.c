@@ -30,6 +30,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 typedef struct event_list{
   void* evenement;
   unsigned long tps;
+  //timer_id_t timer_id;
   struct event_list *next_event;
 }LISTE;
 
@@ -144,10 +145,19 @@ timer_id_t timer_set (Uint32 delay, void *param)
   //pthread_mutex_unlock(&mutex);
   return (timer_id_t) NULL;
 }
-
+//l.timer_id=timer_set;
 int timer_cancel (timer_id_t timer_id)
 {
   //TODO
+ //event_list *p,*pre;  
+ //p = l;
+ //while(p->timer_id != timer_id)
+ //{
+ // pre = p;
+ // p = p->next_event;
+ //}
+ //pre->next_event = p->next_event;
+ //free(p);
   return 0; // failure
 }
 
