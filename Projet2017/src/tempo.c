@@ -30,6 +30,7 @@ typedef struct event_list{
   void* evenement;
   unsigned long tps;
   struct event_list *next_event;
+  unsigned long time;
 }LISTE;
 
 LISTE *l = NULL;
@@ -39,6 +40,7 @@ LISTE* new_event(long timer,void* event){
   lBis->evenement=event;
   lBis->tps=timer;
   lBis->next_event=NULL;
+  lBIS->time=get_time();
   return lBis;
 }
 
