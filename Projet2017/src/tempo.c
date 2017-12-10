@@ -75,7 +75,7 @@ int timer_init (void)
   struct sigaction s;
   s.sa_flags = 0;
   sigemptyset(&s.sa_mask);
-  s.sa_handler = handler; 
+  s.sa_handler = handler;
   sigaction(SIGALRM,&s,NULL);
   sigset_t block;
   sigemptyset(&block);
@@ -92,13 +92,6 @@ int timer_init (void)
 
 timer_id_t timer_set (Uint32 delay, void *param)
 {
- 
-  if(l == NULL){
-     l=new_event(get_time()+delay,param);
-  }
-  else{
-    untilNext(l,delay +get_time(),param);
-  }
   struct itimerval timer;
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 0;
@@ -106,14 +99,27 @@ timer_id_t timer_set (Uint32 delay, void *param)
   timer.it_value.tv_sec = delay/1000;
   timer.it_value.tv_usec = (delay%1000)*1000;
 
+
+  if(l == NULL){
+     l=new_event(get_time()+delay,param);
+  }
+  else{
+
+    timer.it_value.tv_sec = (delay-(get_time()-l->time))/1000;
+    timer.it_value.tv_usec = ((delay-(get_time()-l->time))%1000)*1000;
+    setitimer(ITIMER_REAL,&timer, NULL)
+    untilNext(l,delay +get_time(),param);
+
+  }
   pthread_mutex_lock(&mutex);
   setitimer(ITIMER_REAL, &timer, NULL);
   pthread_mutex_unlock(&mutex);
   return (timer_id_t) NULL;
 }
+
 int timer_cancel (timer_id_t timer_id)
 {
-  return 0; 
+  return 0;
 }
 
 #endif
