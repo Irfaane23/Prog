@@ -69,7 +69,7 @@ void *infiniteLoop(void *p){
     pthread_sigmask(SIG_BLOCK, &mask, NULL);
     //printf("\ndans infinite loop, avant le while");
   while(1){
-    //printf("\nc'est pas beau wallah");
+	   //printf("on est a la fin de L\n");  
     sigsuspend(&mask);
 
   }
@@ -80,14 +80,14 @@ void handler(int sig){
     //  pthread_mutex_unlock(&mutex);
     //}
     sdl_push_event(l->evenement);
-    printf("\nDEBUG SLD\n");
+    printf("\nDEBUG SLD\n");  
     l=l->next_event;
   }
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
   //printf("\ndans timer_init");
-  int nbThreads = 3;
+  int nbThreads = 5;
   pthread_t t[nbThreads];
 
   //installation du handler pour le signal SIGALRM
@@ -117,7 +117,7 @@ int timer_init (void)
 timer_id_t timer_set (Uint32 delay, void *param)
 {
 
-  pthread_mutex_lock(&mutex);
+   pthread_mutex_lock(&mutex);
   if(l == NULL){
     //creer un evenement
     //printf("\nadd event");
@@ -129,7 +129,7 @@ timer_id_t timer_set (Uint32 delay, void *param)
     printf ("sdl_push_event(%p) appelée au temps %ld\n", param, get_time ());
   }
   printf("Thread courant : %p envoie le signal \n", pthread_self());
-  pthread_mutex_unlock(&mutex);
+   pthread_mutex_unlock(&mutex);
 
   ////// PAS TOUCHE /////////////
 
@@ -140,9 +140,9 @@ timer_id_t timer_set (Uint32 delay, void *param)
   timer.it_value.tv_sec = delay/1000;
   timer.it_value.tv_usec = (delay%1000)*1000;
 
-  //pthread_mutex_lock(&mutex);
+  pthread_mutex_lock(&mutex);
   setitimer(ITIMER_REAL, &timer, NULL);
-  //pthread_mutex_unlock(&mutex);
+  pthread_mutex_unlock(&mutex);
   return (timer_id_t) NULL;
 }
 //l.timer_id=timer_set;
